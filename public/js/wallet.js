@@ -73,6 +73,10 @@ const SolanaWallet = {
   isEvolving: false,
   provider: null,
   walletType: null, // 'phantom', 'solflare', 'backpack', 'jupiter', 'mock'
+  peer: null,
+  conn: null,
+  isHost: false,
+  matchSubscription: null,
 
   init() {
     this.setupListeners();
@@ -493,40 +497,203 @@ const SolanaWallet = {
 
       stepSig.querySelector('.step-check').textContent = '🟢';
       
-      // Step 3: Searching for opponent
+      // Step 3: Searching for opponent using Supabase & PeerJS
       await this.sleep(1000);
       stepSearch.classList.add('active');
       statusText.textContent = "Lobi ağında uygun rakip aranıyor...";
-      
-      const opponents = [
-        { name: 'SolanaWhale_42', wallet: 'SOLW...eP3s' },
-        { name: 'CryptoPuffer_99', wallet: 'PUFF...2aTz' },
-        { name: 'DegenApe_Sol', wallet: 'DEGE...8gK9' },
-        { name: 'PhantomJedi', wallet: 'JEDI...5uLv' }
-      ];
-      
-      const matched = opponents[Math.floor(Math.random() * opponents.length)];
 
-      await this.sleep(2000);
-      stepSearch.querySelector('.step-check').textContent = '🟢';
-      statusText.textContent = `Rakip Bulundu! ${matched.name} (${matched.wallet}) ile savaşa giriliyor...`;
+      // Delete any stale queue entries for this user
+      await window.supabase.from('matchmaking_queue').delete().eq('wallet_address', this.publicKey);
+
+      // Initialize PeerJS if not already active
+      if (!this.peer) {
+        console.log("[PeerJS] Initializing connection with ID:", this.publicKey);
+        this.peer = new Peer(this.publicKey, {
+          host: 'peerjs.com',
+          port: 443,
+          secure: true,
+          debug: 1
+        });
+
+        await new Promise((resolve, reject) => {
+          this.peer.on('open', (id) => {
+            console.log("[PeerJS] Connection opened. ID is:", id);
+            resolve();
+          });
+          this.peer.on('error', (err) => {
+            console.error("[PeerJS] Init error:", err);
+            reject(err);
+          });
+        });
+      }
+
+      // Check if there is an active opponent waiting in the queue
+      const isEvolved = Game.isPokemonEvolvedActive(Game.p1Selected);
       
-      await this.sleep(1500);
-      
-      // Trigger Game start versus!
-      Game.startVersusMatch(matched.name, matched.wallet);
+      const { data: queue, error: queueError } = await window.supabase
+        .from('matchmaking_queue')
+        .select('*')
+        .eq('status', 'waiting')
+        .eq('is_evolved', isEvolved)
+        .neq('wallet_address', this.publicKey)
+        .order('created_at', { ascending: true })
+        .limit(1);
+
+      if (queueError) throw queueError;
+
+      if (queue && queue.length > 0) {
+        // Match found! We are the CLIENT.
+        const opponent = queue[0];
+        console.log("[Matchmaking] Found opponent waiting in queue:", opponent);
+        
+        // Update their row to mark as matched
+        const { error: matchError } = await window.supabase
+          .from('matchmaking_queue')
+          .update({
+            status: 'matched',
+            matched_wallet: this.publicKey,
+            matched_peer_id: this.publicKey
+          })
+          .eq('wallet_address', opponent.wallet_address)
+          .eq('status', 'waiting');
+
+        if (matchError) throw matchError;
+
+        this.isHost = false;
+        stepSearch.querySelector('.step-check').textContent = '🟢';
+        statusText.textContent = `Rakip Bulundu! Bağlantı kuruluyor...`;
+
+        // Connect to Host
+        console.log("[WebRTC] Connecting to Host Peer ID:", opponent.peer_id);
+        const conn = this.peer.connect(opponent.peer_id, { reliable: true });
+        this.conn = conn;
+        this.setupGameConnection(conn);
+
+      } else {
+        // No opponent found. We are the HOST.
+        console.log("[Matchmaking] No opponent found. Inserting ourselves as Host...");
+        this.isHost = true;
+
+        const { error: insertError } = await window.supabase
+          .from('matchmaking_queue')
+          .insert({
+            wallet_address: this.publicKey,
+            peer_id: this.publicKey,
+            pokemon: Game.p1Selected,
+            is_evolved: isEvolved,
+            status: 'waiting',
+            role: 'host'
+          });
+
+        if (insertError) throw insertError;
+
+        // Set up real-time listener on our row to see when someone matches us
+        this.matchSubscription = window.supabase.channel('matchmaking_lobby')
+          .on('postgres_changes', {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'matchmaking_queue',
+            filter: `wallet_address=eq.${this.publicKey}`
+          }, (payload) => {
+            const row = payload.new;
+            if (row.status === 'matched') {
+              console.log("[Matchmaking] Match detected via Realtime! Opponent is:", row.matched_wallet);
+              
+              this.unsubscribeMatchmaking();
+              
+              stepSearch.querySelector('.step-check').textContent = '🟢';
+              statusText.textContent = `Rakip Bulundu! Karşılaşma başlıyor...`;
+              
+              // We just wait for their incoming PeerJS connection!
+            }
+          })
+          .subscribe();
+
+        // Listen for incoming PeerJS connection from Client
+        this.peer.on('connection', (conn) => {
+          console.log("[WebRTC] Received incoming connection from Client!");
+          this.conn = conn;
+          this.setupGameConnection(conn);
+        });
+      }
 
     } catch (err) {
       console.error("Matchmaking error", err);
-      statusText.textContent = "Bağlantı veya imza işlemi iptal edildi.";
-      await this.sleep(1500);
+      statusText.textContent = "Bağlantı veya eşleşme hatası oluştu.";
+      await this.sleep(2000);
       this.cancelMatchmaking();
     }
   },
 
-  cancelMatchmaking() {
+  setupGameConnection(conn) {
+    conn.on('open', () => {
+      console.log("[WebRTC] Data channel is fully open!");
+      
+      // Handshake details
+      conn.send({
+        type: 'handshake',
+        pokemon: Game.p1Selected,
+        isEvolved: Game.isPokemonEvolvedActive(Game.p1Selected),
+        wallet: this.publicKey
+      });
+    });
+
+    conn.on('data', (data) => {
+      if (data.type === 'handshake') {
+        console.log("[WebRTC] Received handshake data:", data);
+        
+        // Remove matchmaking row as we are successfully playing
+        window.supabase.from('matchmaking_queue').delete().eq('wallet_address', this.publicKey).then(() => {
+          console.log("[Matchmaking] Cleanup complete.");
+        });
+
+        // Initialize online versus game
+        Game.startOnlineVersusGame(data.wallet, data.pokemon, data.isEvolved);
+      }
+      else if (data.type === 'state') {
+        Game.receiveHostState(data);
+      }
+      else if (data.type === 'input') {
+        Game.receiveClientInput(data.keys);
+      }
+      else if (data.type === 'action') {
+        Game.receiveAction(data);
+      }
+    });
+
+    conn.on('close', () => {
+      console.log("[WebRTC] Connection closed.");
+      Game.handleDisconnect();
+    });
+
+    conn.on('error', (err) => {
+      console.error("[WebRTC] Connection error:", err);
+      Game.handleDisconnect();
+    });
+  },
+
+  async cancelMatchmaking() {
+    this.unsubscribeMatchmaking();
+    if (this.connected && this.publicKey) {
+      try {
+        await window.supabase.from('matchmaking_queue').delete().eq('wallet_address', this.publicKey);
+      } catch (e) {
+        console.warn("Failed to delete matchmaking queue row:", e);
+      }
+    }
+    if (this.conn) {
+      this.conn.close();
+      this.conn = null;
+    }
     Game.switchScreen('menu-screen');
     SoundEffects.playBounce();
+  },
+
+  unsubscribeMatchmaking() {
+    if (this.matchSubscription) {
+      window.supabase.removeChannel(this.matchSubscription);
+      this.matchSubscription = null;
+    }
   },
 
   sleep(ms) {

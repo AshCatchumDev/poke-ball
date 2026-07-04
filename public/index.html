@@ -321,6 +321,18 @@
 
   </div>
 
+  <!-- External Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+
+  <!-- Network Configuration -->
+  <script>
+    window.SUPABASE_URL = "https://bedblghtuefucqbezjzv.supabase.co";
+    window.SUPABASE_ANON_KEY = "sb_publishable_aeOkekpURzTv30uK36MJGA_MMzvxkdm";
+    // Initialize Supabase Client
+    window.supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+  </script>
+
   <!-- Game Scripts -->
   <script src="js/physics.js"></script>
   <script src="js/audio.js"></script>

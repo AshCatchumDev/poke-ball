@@ -103,6 +103,7 @@ const Game = {
       document.getElementById('p2-selection').querySelector('h3').textContent = 'AI RAKİP';
       document.getElementById('ai-settings').style.display = 'flex';
       document.getElementById('hud-p2-label').textContent = 'AI';
+      document.getElementById('start-game-btn').textContent = 'SAVAŞI BAŞLAT';
       this.switchScreen('select-screen');
       SoundEffects.playKick();
     });
@@ -114,7 +115,12 @@ const Game = {
         return;
       }
       this.mode = 'versus';
-      window.SolanaWallet.startMatchmaking();
+      this.activeSelector = 'p1';
+      document.getElementById('p2-selection').querySelector('h3').textContent = 'RAKİP ARANIYOR';
+      document.getElementById('ai-settings').style.display = 'none';
+      document.getElementById('start-game-btn').textContent = 'RAKİP ARA';
+      this.switchScreen('select-screen');
+      SoundEffects.playKick();
     });
 
     document.getElementById('back-to-menu-btn').addEventListener('click', () => {
@@ -136,7 +142,11 @@ const Game = {
 
     // Start Button
     document.getElementById('start-game-btn').addEventListener('click', () => {
-      this.startGame();
+      if (this.mode === 'versus') {
+        window.SolanaWallet.startMatchmaking();
+      } else {
+        this.startGame();
+      }
       SoundEffects.playGoal();
     });
 
@@ -443,14 +453,28 @@ const Game = {
     this.goalFreeze = true;
     this.goalFreezeTimer = 100; // Freeze for ~1.6s
 
+    // Send action to Client
+    if (this.mode === 'versus' && this.isHost) {
+      this.sendActionToClient('prepare_toast', { msg: msg });
+    }
+
     setTimeout(() => {
       toast.textContent = "SAVAŞ!";
       SoundEffects.playKick();
+      
+      if (this.mode === 'versus' && this.isHost) {
+        this.sendActionToClient('prepare_toast', { msg: "SAVAŞ!" });
+        this.sendActionToClient('sound_kick');
+      }
+
       setTimeout(() => {
         toast.classList.remove('show');
+        if (this.mode === 'versus' && this.isHost) {
+          this.sendActionToClient('hide_toast');
+        }
         this.goalFreeze = false;
       }, 600);
-    }, 1000);
+    }, 1200);
   },
 
   togglePause() {
@@ -484,7 +508,14 @@ const Game = {
     if (this.timerInterval) clearInterval(this.timerInterval);
     document.getElementById('pause-overlay').classList.remove('active');
     document.getElementById('quit-confirm-modal').style.display = 'none';
-    this.switchScreen('menu-screen');
+    
+    if (this.mode === 'versus') {
+      if (window.SolanaWallet) {
+        window.SolanaWallet.cancelMatchmaking();
+      }
+    } else {
+      this.switchScreen('menu-screen');
+    }
   },
 
   endGame() {
@@ -492,15 +523,29 @@ const Game = {
     this.state = 'gameover';
     SoundEffects.playGameOver();
 
+    if (this.mode === 'versus' && this.isHost) {
+      this.sendActionToClient('game_over');
+    }
+
     // Determine winner text
     let winnerTitle = "BERABERE!";
     let winnerDetail = "Savaşta yenişemediniz.";
     if (this.scoreP1 > this.scoreP2) {
-      winnerTitle = "SAVAŞI KAZANDINIZ!";
-      winnerDetail = `${this.p1Selected.toUpperCase()}, ${this.p2Selected.toUpperCase()} rakibini alt etti!`;
+      if (this.mode === 'versus') {
+        winnerTitle = this.isHost ? "SAVAŞI KAZANDINIZ!" : "MAĞLUP OLDUNUZ!";
+        winnerDetail = this.isHost ? `${this.p1Selected.toUpperCase()} ile zafer kazandınız!` : `${this.p1Selected.toUpperCase()} rakibine yenildiniz.`;
+      } else {
+        winnerTitle = "SAVAŞI KAZANDINIZ!";
+        winnerDetail = `${this.p1Selected.toUpperCase()}, ${this.p2Selected.toUpperCase()} rakibini alt etti!`;
+      }
     } else if (this.scoreP2 > this.scoreP1) {
-      winnerTitle = "AI RAKİP KAZANDI!";
-      winnerDetail = `${this.p2Selected.toUpperCase()} botu sizi mağlup etti.`;
+      if (this.mode === 'versus') {
+        winnerTitle = this.isHost ? "MAĞLUP OLDUNUZ!" : "SAVAŞI KAZANDINIZ!";
+        winnerDetail = this.isHost ? `${this.p2Selected.toUpperCase()} rakibine yenildiniz.` : `${this.p2Selected.toUpperCase()} ile zafer kazandınız!`;
+      } else {
+        winnerTitle = "AI RAKİP KAZANDI!";
+        winnerDetail = `${this.p2Selected.toUpperCase()} botu sizi mağlup etti.`;
+      }
     }
 
     document.getElementById('winner-title').textContent = winnerTitle;
@@ -523,11 +568,21 @@ const Game = {
       document.getElementById('score-p1').textContent = this.scoreP1;
       this.particles.emitGoalConfetti(960, 360, 80); // explode confetti inside right goal mouth
       this.shake.shake(4, 20); // Gentle professional shake rumble
+
+      if (this.mode === 'versus' && this.isHost) {
+        this.sendActionToClient('goal_confetti', { x: 960, y: 360, count: 80 });
+        this.sendActionToClient('sound_goal');
+      }
     } else {
       this.scoreP2++;
       document.getElementById('score-p2').textContent = this.scoreP2;
       this.particles.emitGoalConfetti(64, 360, 80); // explode inside left goal mouth
       this.shake.shake(4, 20);
+
+      if (this.mode === 'versus' && this.isHost) {
+        this.sendActionToClient('goal_confetti', { x: 64, y: 360, count: 80 });
+        this.sendActionToClient('sound_goal');
+      }
     }
 
     SoundEffects.playGoal();
@@ -536,9 +591,15 @@ const Game = {
     const toast = document.getElementById('action-toast');
     toast.textContent = "GOL!";
     toast.classList.add('show');
+    if (this.mode === 'versus' && this.isHost) {
+      this.sendActionToClient('prepare_toast', { msg: "GOL!" });
+    }
 
     setTimeout(() => {
       toast.classList.remove('show');
+      if (this.mode === 'versus' && this.isHost) {
+        this.sendActionToClient('hide_toast');
+      }
       this.resetRound();
     }, 1800);
   },
@@ -576,9 +637,6 @@ const Game = {
     if (this.keysPressed['KeyQ'] || this.keysPressed['ShiftLeft'] || this.keysPressed['ShiftRight']) {
       this.p1.useSpecial(this.ball, this.p2, this.particles);
     }
-
-    // Run AI logic for Player 2 (AI Opponent)
-    AI.update(this.p2, this.p1, this.ball, this.difficulty);
   },
 
   update() {
@@ -587,8 +645,29 @@ const Game = {
 
     if (this.state !== 'playing') return;
 
-    // Handle character movement & inputs
+    // If Client, just send inputs and skip local physics execution
+    if (this.mode === 'versus' && !this.isHost) {
+      this.sendInputsToHost();
+      return;
+    }
+
+    // Host or Local VS AI runs updates:
     this.handleInput();
+
+    if (this.mode === 'versus' && this.isHost) {
+      // Apply remote inputs on Host for Player 2
+      if (this.remoteInputs) {
+        if (this.remoteInputs.left) this.p2.moveLeft();
+        if (this.remoteInputs.right) this.p2.moveRight();
+        if (this.remoteInputs.jump) this.p2.jump();
+        if (this.remoteInputs.special) {
+          this.p2.useSpecial(this.ball, this.p1, this.particles);
+        }
+      }
+    } else {
+      // AI
+      AI.update(this.p2, this.p1, this.ball, this.difficulty);
+    }
 
     // Entity updates
     this.p1.update(this.particles, this.ball, this.p2);
@@ -607,6 +686,10 @@ const Game = {
       Physics.resolveCircleCollision(this.p1, this.ball, this.p1.stats.kickPower);
       SoundEffects.playKick();
       this.shake.shake(3, 10);
+
+      if (this.mode === 'versus' && this.isHost) {
+        this.sendActionToClient('sound_kick');
+      }
     }
 
     // 3. Player 2 vs Ball
@@ -615,18 +698,25 @@ const Game = {
       Physics.resolveCircleCollision(this.p2, this.ball, this.p2.stats.kickPower);
       SoundEffects.playKick();
       this.shake.shake(3, 10);
+
+      if (this.mode === 'versus' && this.isHost) {
+        this.sendActionToClient('sound_kick');
+      }
     }
 
     // Check for goal scoring conditions
     if (!this.goalFreeze) {
-      // Left Goal mouth limits: ball fully enters left net bounds
       if (this.ball.pos.x < (this.leftGoal.x + this.leftGoal.width - 5) && this.ball.pos.y > this.leftGoal.y) {
-        this.scoreGoal('p2'); // Player 2 scores!
+        this.scoreGoal('p2');
       }
-      // Right Goal mouth limits: ball enters right net bounds
       else if (this.ball.pos.x > (this.rightGoal.x + 5) && this.ball.pos.y > this.rightGoal.y) {
-        this.scoreGoal('p1'); // Player 1 scores!
+        this.scoreGoal('p1');
       }
+    }
+
+    // Host sends game state to client
+    if (this.mode === 'versus' && this.isHost) {
+      this.broadcastStateToClient();
     }
 
     // Update Energy Fill UI indicators
@@ -657,6 +747,201 @@ const Game = {
     this.particles.draw(this.ctx);
 
     this.ctx.restore();
+  },
+
+  // ==========================================
+  // REAL-TIME MULTIPLAYER SYSTEM METHODS
+  // ==========================================
+  
+  startOnlineVersusGame(opponentWallet, opponentPokemon, opponentEvolved) {
+    this.mode = 'versus';
+    this.opponentWallet = opponentWallet;
+    this.opponentName = opponentWallet.substring(0, 4) + '...' + opponentWallet.substring(opponentWallet.length - 4);
+    this.p2Selected = opponentPokemon;
+    this.opponentEvolved = opponentEvolved;
+    this.isHost = SolanaWallet.isHost;
+
+    // Reset score and state
+    this.scoreP1 = 0;
+    this.scoreP2 = 0;
+    this.timeLeft = 90;
+    this.goalFreeze = false;
+    this.particles.clear();
+    
+    const p1Evo = this.isPokemonEvolvedActive(this.p1Selected);
+    const p2Evo = opponentEvolved;
+    
+    // Update HTML HUD names
+    document.getElementById('hud-p1-name').textContent = getPokemonDisplayName(this.p1Selected, p1Evo);
+    document.getElementById('hud-p2-name').textContent = this.opponentName;
+    document.getElementById('hud-p2-label').textContent = opponentWallet.substring(0, 8) + '...';
+    
+    document.getElementById('score-p1').textContent = '0';
+    document.getElementById('score-p2').textContent = '0';
+    document.getElementById('timer').textContent = this.timeLeft;
+
+    // Initialize Game Entities
+    this.p1 = new PokemonPlayer(220, 360, this.p1Selected, 'left', this, p1Evo);
+    this.p2 = new PokemonPlayer(804, 360, this.p2Selected, 'right', this, p2Evo);
+    this.ball = new GameBall(512, 150);
+    
+    this.leftGoal = new GameGoal('left', 576);
+    this.rightGoal = new GameGoal('right', 576);
+
+    this.switchScreen('game-screen');
+    this.triggerPrepareToast('HAZIRLANIN...');
+
+    // Host handles timer countdown
+    if (this.isHost) {
+      if (this.timerInterval) clearInterval(this.timerInterval);
+      this.timerInterval = setInterval(() => {
+        if (this.state === 'playing' && !this.goalFreeze) {
+          this.timeLeft--;
+          document.getElementById('timer').textContent = this.timeLeft;
+
+          if (this.timeLeft <= 0) {
+            this.endGame();
+          }
+        }
+      }, 1000);
+    }
+
+    // Cancel old game loop and start new one
+    if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
+    this.gameLoop();
+  },
+
+  sendInputsToHost() {
+    if (SolanaWallet.conn && SolanaWallet.conn.open) {
+      const keys = {
+        left: this.keysPressed['KeyA'] || this.keysPressed['ArrowLeft'] || false,
+        right: this.keysPressed['KeyD'] || this.keysPressed['ArrowRight'] || false,
+        jump: this.keysPressed['KeyW'] || this.keysPressed['ArrowUp'] || false,
+        special: this.keysPressed['KeyQ'] || this.keysPressed['ShiftLeft'] || this.keysPressed['ShiftRight'] || false
+      };
+      SolanaWallet.conn.send({
+        type: 'input',
+        keys: keys
+      });
+    }
+  },
+
+  broadcastStateToClient() {
+    if (SolanaWallet.conn && SolanaWallet.conn.open) {
+      SolanaWallet.conn.send({
+        type: 'state',
+        p1: {
+          pos: { x: this.p1.pos.x, y: this.p1.pos.y },
+          vel: { x: this.p1.vel.x, y: this.p1.vel.y },
+          energy: this.p1.energy,
+          state: this.p1.state,
+          animFrame: this.p1.animFrame,
+          specialActive: this.p1.specialActive
+        },
+        p2: {
+          pos: { x: this.p2.pos.x, y: this.p2.pos.y },
+          vel: { x: this.p2.vel.x, y: this.p2.vel.y },
+          energy: this.p2.energy,
+          state: this.p2.state,
+          animFrame: this.p2.animFrame,
+          specialActive: this.p2.specialActive
+        },
+        ball: {
+          pos: { x: this.ball.pos.x, y: this.ball.pos.y },
+          vel: { x: this.ball.vel.x, y: this.ball.vel.y }
+        },
+        scoreP1: this.scoreP1,
+        scoreP2: this.scoreP2,
+        timeLeft: this.timeLeft,
+        goalFreeze: this.goalFreeze
+      });
+    }
+  },
+
+  sendActionToClient(actionName, data = {}) {
+    if (SolanaWallet.conn && SolanaWallet.conn.open) {
+      SolanaWallet.conn.send({
+        type: 'action',
+        action: actionName,
+        data: data
+      });
+    }
+  },
+
+  receiveHostState(data) {
+    if (!this.p1 || !this.p2 || !this.ball) return;
+    
+    // Authoritative override
+    this.p1.pos.x = data.p1.pos.x;
+    this.p1.pos.y = data.p1.pos.y;
+    this.p1.vel.x = data.p1.vel.x;
+    this.p1.vel.y = data.p1.vel.y;
+    this.p1.energy = data.p1.energy;
+    this.p1.state = data.p1.state;
+    this.p1.animFrame = data.p1.animFrame;
+    this.p1.specialActive = data.p1.specialActive;
+
+    this.p2.pos.x = data.p2.pos.x;
+    this.p2.pos.y = data.p2.pos.y;
+    this.p2.vel.x = data.p2.vel.x;
+    this.p2.vel.y = data.p2.vel.y;
+    this.p2.energy = data.p2.energy;
+    this.p2.state = data.p2.state;
+    this.p2.animFrame = data.p2.animFrame;
+    this.p2.specialActive = data.p2.specialActive;
+
+    this.ball.pos.x = data.ball.pos.x;
+    this.ball.pos.y = data.ball.pos.y;
+    this.ball.vel.x = data.ball.vel.x;
+    this.ball.vel.y = data.ball.vel.y;
+
+    this.scoreP1 = data.scoreP1;
+    this.scoreP2 = data.scoreP2;
+    this.timeLeft = data.timeLeft;
+    this.goalFreeze = data.goalFreeze;
+
+    // Update UI elements
+    document.getElementById('score-p1').textContent = this.scoreP1;
+    document.getElementById('score-p2').textContent = this.scoreP2;
+    document.getElementById('timer').textContent = this.timeLeft;
+    document.getElementById('hud-p1-energy').style.width = `${(this.p1.energy / this.p1.maxEnergy) * 100}%`;
+    document.getElementById('hud-p2-energy').style.width = `${(this.p2.energy / this.p2.maxEnergy) * 100}%`;
+  },
+
+  receiveClientInput(keys) {
+    this.remoteInputs = keys;
+  },
+
+  receiveAction(data) {
+    if (data.action === 'sound_kick') {
+      SoundEffects.playKick();
+      this.shake.shake(3, 10);
+    }
+    else if (data.action === 'sound_goal') {
+      SoundEffects.playGoal();
+      this.shake.shake(4, 20);
+    }
+    else if (data.action === 'goal_confetti') {
+      this.particles.emitGoalConfetti(data.data.x, data.data.y, data.data.count);
+    }
+    else if (data.action === 'prepare_toast') {
+      const toast = document.getElementById('action-toast');
+      toast.textContent = data.data.msg;
+      toast.classList.add('show');
+    }
+    else if (data.action === 'hide_toast') {
+      document.getElementById('action-toast').classList.remove('show');
+    }
+    else if (data.action === 'game_over') {
+      this.endGame();
+    }
+  },
+
+  handleDisconnect() {
+    if (this.state === 'playing' || this.state === 'paused') {
+      alert("Rakip oyundan ayrıldı veya bağlantısı koptu!");
+      this.quitGame();
+    }
   },
 
   drawStadium(ctx) {
