@@ -133,6 +133,12 @@
             <span class="btn-desc" id="mode-pvp-desc">Cüzdan bağlayarak Solana arenasına katılın</span>
             <span class="badge-locked" id="mode-pvp-badge">KİLİTLİ</span>
           </button>
+
+          <button id="show-leaderboard-btn" class="menu-btn font-outfit">
+            <span class="btn-icon">🏆</span>
+            <span class="btn-text">LİDERLİK TABLOSU</span>
+            <span class="btn-desc">Arenanın en iyi 10 Pokémon şampiyonu</span>
+          </button>
         </div>
 
         <div class="how-to-play glass-sub-panel font-outfit">
@@ -149,6 +155,34 @@
         </div>
 
         <button id="back-to-landing-btn" class="back-btn font-outfit" style="margin-top: 1.2rem; width: 100%;">Geri Dön (Ana Sayfa)</button>
+      </div>
+    </div>
+
+    <!-- Leaderboard Screen -->
+    <div id="leaderboard-screen" class="screen">
+      <div class="glass-panel leaderboard-panel">
+        <h2 class="panel-title font-outfit">🏆 LİDERLİK TABLOSU</h2>
+        
+        <div class="leaderboard-container glass-sub-panel font-outfit">
+          <table class="leaderboard-table">
+            <thead>
+              <tr>
+                <th>Sıra</th>
+                <th>Cüzdan Adresi</th>
+                <th>Galibiyet (W)</th>
+                <th>Mağlubiyet (L)</th>
+                <th>Kazanma Oranı</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboard-body">
+              <tr>
+                <td colspan="5" style="text-align: center; padding: 2rem;">Yükleniyor...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <button id="leaderboard-back-btn" class="back-btn font-outfit" style="margin-top: 1.2rem; width: 100%;">Geri Dön</button>
       </div>
     </div>
 

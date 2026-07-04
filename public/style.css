@@ -1684,3 +1684,99 @@ body {
   width: 24px;
   text-align: center;
 }
+
+/* Leaderboard Screen Styles */
+.leaderboard-panel {
+  width: 90%;
+  max-width: 720px;
+  padding: 2rem;
+  box-shadow: 0 0 40px rgba(168, 85, 247, 0.15);
+}
+
+.leaderboard-container {
+  max-height: 420px;
+  overflow-y: auto;
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.leaderboard-table th {
+  background: rgba(147, 51, 234, 0.12);
+  color: #c084fc;
+  font-weight: 700;
+  padding: 1rem;
+  font-size: 0.95rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  letter-spacing: 0.5px;
+}
+
+.leaderboard-table td {
+  padding: 0.9rem 1rem;
+  font-size: 0.9rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  color: #e2e8f0;
+}
+
+.leaderboard-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.leaderboard-table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.leaderboard-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* Rank Styling & Highlights */
+.rank-badge {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-weight: 800;
+  font-size: 0.85rem;
+  background: rgba(255, 255, 255, 0.05);
+  color: #94a3b8;
+}
+
+tr:nth-child(1) .rank-badge {
+  background: radial-gradient(circle, #fcd34d 0%, #d97706 100%);
+  color: #0f172a;
+  box-shadow: 0 0 12px rgba(251, 191, 36, 0.6);
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.4);
+}
+
+tr:nth-child(2) .rank-badge {
+  background: radial-gradient(circle, #e2e8f0 0%, #64748b 100%);
+  color: #0f172a;
+  box-shadow: 0 0 10px rgba(226, 232, 240, 0.4);
+}
+
+tr:nth-child(3) .rank-badge {
+  background: radial-gradient(circle, #ffedd5 0%, #c2410c 100%);
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(249, 115, 22, 0.4);
+}
+
+.wallet-cell {
+  font-family: monospace;
+  font-weight: 600;
+  color: #38bdf8;
+  letter-spacing: 0.5px;
+}
+
+.win-rate-cell {
+  font-weight: 700;
+  color: #10b981;
+}

@@ -96,6 +96,18 @@ const Game = {
       SoundEffects.playBounce();
     });
 
+    // Leaderboard Screen Navigation
+    document.getElementById('show-leaderboard-btn').addEventListener('click', () => {
+      this.switchScreen('leaderboard-screen');
+      this.loadLeaderboard();
+      SoundEffects.playKick();
+    });
+
+    document.getElementById('leaderboard-back-btn').addEventListener('click', () => {
+      this.switchScreen('menu-screen');
+      SoundEffects.playBounce();
+    });
+
     // Main Menu Navigation
     document.getElementById('mode-vs-ai').addEventListener('click', () => {
       this.mode = 'vs-ai';
@@ -252,6 +264,7 @@ const Game = {
     // Set Game State
     if (screenId === 'landing-screen') this.state = 'landing';
     else if (screenId === 'menu-screen') this.state = 'menu';
+    else if (screenId === 'leaderboard-screen') this.state = 'leaderboard';
     else if (screenId === 'select-screen') {
       this.state = 'select';
       this.renderRosterGrid();
@@ -529,6 +542,7 @@ const Game = {
 
     if (this.mode === 'versus' && this.isHost) {
       this.sendActionToClient('game_over');
+      this.reportVersusMatchResults();
     }
 
     // Determine winner text
@@ -956,7 +970,105 @@ const Game = {
   handleDisconnect() {
     if (this.state === 'playing' || this.state === 'paused') {
       alert("Rakip oyundan ayrıldı veya bağlantısı koptu! Hükmen galip sayıldınız.");
+      this.reportForfeitResults();
       this.quitGame();
+    }
+  },
+
+  async loadLeaderboard() {
+    const tbody = document.getElementById('leaderboard-body');
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem; color: #a855f7;">Yükleniyor...</td></tr>';
+    
+    try {
+      if (!window.supabase) {
+        throw new Error("Supabase context is missing");
+      }
+
+      const { data, error } = await window.supabase
+        .from('player_stats')
+        .select('*')
+        .order('wins', { ascending: false })
+        .limit(10);
+        
+      if (error) throw error;
+      
+      if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem; color: #64748b;">Henüz sıralama kaydı bulunmuyor. İlk şampiyon siz olun!</td></tr>';
+        return;
+      }
+      
+      tbody.innerHTML = '';
+      data.forEach((row, index) => {
+        const rank = index + 1;
+        const wallet = row.wallet_address;
+        const maskedWallet = wallet.substring(0, 6) + '...' + wallet.substring(wallet.length - 6);
+        const wins = row.wins;
+        const losses = row.losses;
+        const total = wins + losses;
+        const winRate = total > 0 ? ((wins / total) * 100).toFixed(1) + '%' : '0.0%';
+        
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><span class="rank-badge">${rank}</span></td>
+          <td class="wallet-cell" title="${wallet}">${maskedWallet}</td>
+          <td>${wins}</td>
+          <td>${losses}</td>
+          <td class="win-rate-cell">${winRate}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    } catch (err) {
+      console.error("Leaderboard load failed:", err);
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 2rem; color: #ef4444;">Sıralama yüklenirken bir hata oluştu: ${err.message || err}</td></tr>`;
+    }
+  },
+
+  async reportVersusMatchResults() {
+    if (this.mode !== 'versus' || !this.isHost) return;
+    
+    const hostWallet = SolanaWallet.publicKey;
+    const clientWallet = this.opponentWallet;
+    
+    if (!hostWallet || !clientWallet) return;
+    
+    console.log("[Stats] Reporting match results to Supabase...");
+    
+    try {
+      if (this.scoreP1 > this.scoreP2) {
+        await Promise.all([
+          window.supabase.rpc('increment_player_win', { player_wallet: hostWallet }),
+          window.supabase.rpc('increment_player_loss', { player_wallet: clientWallet })
+        ]);
+        console.log("[Stats] Host win, Client loss recorded successfully.");
+      } else if (this.scoreP2 > this.scoreP1) {
+        await Promise.all([
+          window.supabase.rpc('increment_player_win', { player_wallet: clientWallet }),
+          window.supabase.rpc('increment_player_loss', { player_wallet: hostWallet })
+        ]);
+        console.log("[Stats] Client win, Host loss recorded successfully.");
+      }
+    } catch (err) {
+      console.warn("[Stats] Failed to report match results:", err);
+    }
+  },
+
+  async reportForfeitResults() {
+    if (this.mode !== 'versus') return;
+    
+    const localWallet = SolanaWallet.publicKey;
+    const oppWallet = this.opponentWallet;
+    
+    if (!localWallet || !oppWallet) return;
+    
+    console.log("[Stats] Reporting forfeit results to Supabase...");
+    try {
+      await Promise.all([
+        window.supabase.rpc('increment_player_win', { player_wallet: localWallet }),
+        window.supabase.rpc('increment_player_loss', { player_wallet: oppWallet })
+      ]);
+      console.log("[Stats] Forfeit win and loss recorded successfully.");
+    } catch (err) {
+      console.warn("[Stats] Failed to report forfeit results:", err);
     }
   },
 
