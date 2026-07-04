@@ -1,3 +1,68 @@
+// Solana Wallet Standard Event Registry for modern extensions (like Jupiter Wallet)
+const StandardWallets = {
+  list: [],
+  init() {
+    console.log("[Wallet Standard Registry] Initializing event listener...");
+    
+    // Listen for wallet-standard:register-wallet events
+    window.addEventListener('wallet-standard:register-wallet', (event) => {
+      try {
+        const register = event.detail;
+        if (typeof register === 'function') {
+          register((wallet) => {
+            if (wallet && !this.list.some(w => w.name === wallet.name)) {
+              this.list.push(wallet);
+              console.log("[Wallet Standard Registry] Registered wallet via event:", wallet.name);
+            }
+          });
+        }
+      } catch (e) {
+        console.error("[Wallet Standard Registry] Error registering wallet:", e);
+      }
+    });
+
+    // Listen for wallets registered directly on navigator
+    if (window.navigator?.wallets?.on) {
+      try {
+        window.navigator.wallets.on('register', () => {
+          const wallets = window.navigator.wallets.get();
+          for (const wallet of wallets) {
+            if (wallet && !this.list.some(w => w.name === wallet.name)) {
+              this.list.push(wallet);
+              console.log("[Wallet Standard Registry] Found wallet registered in navigator:", wallet.name);
+            }
+          }
+        });
+      } catch (e) {
+        console.warn("Failed to set navigator.wallets listener:", e);
+      }
+    }
+
+    // Check existing wallets on navigator immediately
+    if (window.navigator?.wallets?.get) {
+      try {
+        const wallets = window.navigator.wallets.get();
+        for (const wallet of wallets) {
+          if (wallet && !this.list.some(w => w.name === wallet.name)) {
+            this.list.push(wallet);
+            console.log("[Wallet Standard Registry] Found existing wallet in navigator:", wallet.name);
+          }
+        }
+      } catch (e) {
+        console.warn("Failed to read navigator.wallets:", e);
+      }
+    }
+
+    // Signal that the app is ready so already-loaded extensions re-trigger registration events
+    try {
+      window.dispatchEvent(new CustomEvent('wallet-standard:app-ready'));
+    } catch (e) {
+      console.warn("Failed to dispatch wallet-standard:app-ready:", e);
+    }
+  }
+};
+StandardWallets.init();
+
 // Solana Wallet Integration & Matchmaking for Poke Ball
 const SolanaWallet = {
   publicKey: null,
@@ -174,39 +239,44 @@ const SolanaWallet = {
         provider = window.solana;
       }
 
-      // 4. Check Wallet Standard (window.navigator.wallets) - Modern approach
-      if (!provider && window.navigator?.wallets?.get) {
+      // 4. Check Wallet Standard (window.navigator.wallets & Event Registry) - Modern approach
+      let jupWallet = null;
+      if (window.navigator?.wallets?.get) {
         const standardWallets = window.navigator.wallets.get();
-        const jupWallet = standardWallets.find(w => w.name?.toLowerCase().includes('jupiter'));
-        if (jupWallet) {
-          console.log("[Wallet Debug] Found Jupiter via Wallet Standard:", jupWallet);
-          provider = {
-            isStandardWallet: true,
-            wallet: jupWallet,
-            async connect(options = {}) {
-              const connectFeature = jupWallet.features['standard:connect'];
-              if (!connectFeature) throw new Error("Wallet does not support connect feature");
-              const { accounts } = await connectFeature.connect({ silent: !!options.onlyIfTrusted });
-              const address = accounts[0].address;
-              return {
-                publicKey: {
-                  toString() { return address; }
-                }
-              };
-            },
-            async signMessage(message, encoding) {
-              const signFeature = jupWallet.features['solana:signMessage'];
-              if (!signFeature) {
-                console.warn("Wallet does not support solana:signMessage feature");
-                return null;
+        jupWallet = standardWallets.find(w => w.name?.toLowerCase().includes('jupiter'));
+      }
+      if (!jupWallet) {
+        jupWallet = StandardWallets.list.find(w => w.name?.toLowerCase().includes('jupiter'));
+      }
+
+      if (!provider && jupWallet) {
+        console.log("[Wallet Debug] Found Jupiter via Wallet Standard:", jupWallet);
+        provider = {
+          isStandardWallet: true,
+          wallet: jupWallet,
+          async connect(options = {}) {
+            const connectFeature = jupWallet.features['standard:connect'];
+            if (!connectFeature) throw new Error("Wallet does not support connect feature");
+            const { accounts } = await connectFeature.connect({ silent: !!options.onlyIfTrusted });
+            const address = accounts[0].address;
+            return {
+              publicKey: {
+                toString() { return address; }
               }
-              return await signFeature.signMessage({
-                account: jupWallet.accounts[0],
-                message
-              });
+            };
+          },
+          async signMessage(message, encoding) {
+            const signFeature = jupWallet.features['solana:signMessage'];
+            if (!signFeature) {
+              console.warn("Wallet does not support solana:signMessage feature");
+              return null;
             }
-          };
-        }
+            return await signFeature.signMessage({
+              account: jupWallet.accounts[0],
+              message
+            });
+          }
+        };
       }
 
       // 5. Fallback: If window.solana exists and does not belong to other well-known wallets (Phantom, Solflare, Backpack), it might be Jupiter!
