@@ -118,38 +118,69 @@ const SolanaWallet = {
     console.log(`[Wallet Debug] Detecting provider for: ${walletType}`);
     console.log("[Wallet Debug] window.solana:", window.solana);
     console.log("[Wallet Debug] window.solanaProviders:", window.solanaProviders);
+    console.log("[Wallet Debug] window.phantom:", window.phantom);
+    console.log("[Wallet Debug] window.solflare:", window.solflare);
+    console.log("[Wallet Debug] window.backpack:", window.backpack);
     console.log("[Wallet Debug] window.jupiter:", window.jupiter);
     console.log("[Wallet Debug] window.navigator.wallets:", window.navigator?.wallets?.get ? window.navigator.wallets.get() : "undefined");
 
+    let provider = null;
+
     if (walletType === 'phantom') {
-      return window.phantom?.solana || (window.solana?.isPhantom ? window.solana : null);
+      provider = window.phantom?.solana || (window.solana?.isPhantom ? window.solana : null);
+      if (!provider && window.solanaProviders) {
+        if (Array.isArray(window.solanaProviders)) {
+          provider = window.solanaProviders.find(p => p.isPhantom);
+        } else if (typeof window.solanaProviders === 'object') {
+          provider = window.solanaProviders.phantom || Object.values(window.solanaProviders).find(p => p.isPhantom);
+        }
+      }
     }
-    if (walletType === 'solflare') {
-      return window.solflare || (window.solana?.isSolflare ? window.solana : null);
+    else if (walletType === 'solflare') {
+      provider = window.solflare || (window.solana?.isSolflare ? window.solana : null);
+      if (!provider && window.solanaProviders) {
+        if (Array.isArray(window.solanaProviders)) {
+          provider = window.solanaProviders.find(p => p.isSolflare);
+        } else if (typeof window.solanaProviders === 'object') {
+          provider = window.solanaProviders.solflare || Object.values(window.solanaProviders).find(p => p.isSolflare);
+        }
+      }
     }
-    if (walletType === 'backpack') {
-      return window.backpack || (window.solana?.isBackpack ? window.solana : null);
+    else if (walletType === 'backpack') {
+      provider = window.backpack || (window.solana?.isBackpack ? window.solana : null);
+      if (!provider && window.solanaProviders) {
+        if (Array.isArray(window.solanaProviders)) {
+          provider = window.solanaProviders.find(p => p.isBackpack || p.constructor?.name?.toLowerCase().includes('backpack'));
+        } else if (typeof window.solanaProviders === 'object') {
+          provider = window.solanaProviders.backpack || Object.values(window.solanaProviders).find(p => p.isBackpack || p.constructor?.name?.toLowerCase().includes('backpack'));
+        }
+      }
     }
-    if (walletType === 'jupiter') {
+    else if (walletType === 'jupiter') {
       // 1. Direct window.jupiter check
       if (window.jupiter) return window.jupiter;
 
       // 2. Check window.solanaProviders (if multiple extensions are installed, e.g., Phantom + Jupiter)
-      if (window.solanaProviders && Array.isArray(window.solanaProviders)) {
-        const jupProvider = window.solanaProviders.find(p => p.isJupiter || p.constructor?.name?.toLowerCase().includes('jupiter'));
-        if (jupProvider) return jupProvider;
+      if (window.solanaProviders) {
+        if (Array.isArray(window.solanaProviders)) {
+          provider = window.solanaProviders.find(p => p.isJupiter || p.constructor?.name?.toLowerCase().includes('jupiter'));
+        } else if (typeof window.solanaProviders === 'object') {
+          provider = window.solanaProviders.jupiter || Object.values(window.solanaProviders).find(p => p.isJupiter || p.constructor?.name?.toLowerCase().includes('jupiter'));
+        }
       }
 
       // 3. Check window.solana?.isJupiter
-      if (window.solana?.isJupiter) return window.solana;
+      if (!provider && window.solana?.isJupiter) {
+        provider = window.solana;
+      }
 
       // 4. Check Wallet Standard (window.navigator.wallets) - Modern approach
-      if (window.navigator?.wallets?.get) {
+      if (!provider && window.navigator?.wallets?.get) {
         const standardWallets = window.navigator.wallets.get();
         const jupWallet = standardWallets.find(w => w.name?.toLowerCase().includes('jupiter'));
         if (jupWallet) {
           console.log("[Wallet Debug] Found Jupiter via Wallet Standard:", jupWallet);
-          return {
+          provider = {
             isStandardWallet: true,
             wallet: jupWallet,
             async connect(options = {}) {
@@ -179,11 +210,12 @@ const SolanaWallet = {
       }
 
       // 5. Fallback: If window.solana exists and does not belong to other well-known wallets (Phantom, Solflare, Backpack), it might be Jupiter!
-      if (window.solana && !window.solana.isPhantom && !window.solana.isSolflare && !window.solana.isBackpack) {
-        return window.solana;
+      if (!provider && window.solana && !window.solana.isPhantom && !window.solana.isSolflare && !window.solana.isBackpack) {
+        provider = window.solana;
       }
     }
-    return null;
+
+    return provider;
   },
 
   async checkIfConnected() {
