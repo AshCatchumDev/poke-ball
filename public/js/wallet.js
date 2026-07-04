@@ -509,9 +509,6 @@ const SolanaWallet = {
       if (!this.peer) {
         console.log("[PeerJS] Initializing connection with ID:", this.publicKey);
         this.peer = new Peer(this.publicKey, {
-          host: 'peerjs.com',
-          port: 443,
-          secure: true,
           debug: 1
         });
 

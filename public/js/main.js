@@ -655,6 +655,14 @@ const Game = {
       return;
     }
 
+    // If goalFreeze is active, block all movement calculations (holds entities in place)
+    if (this.goalFreeze) {
+      if (this.mode === 'versus' && this.isHost) {
+        this.broadcastStateToClient();
+      }
+      return;
+    }
+
     // Host or Local VS AI runs updates:
     this.handleInput();
 
