@@ -443,6 +443,10 @@ const Game = {
     // Cancel old game loop and start new one
     if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
     this.gameLoop();
+
+    // Focus window to capture keyboard input immediately
+    window.focus();
+    if (this.canvas) this.canvas.focus();
   },
 
   triggerPrepareToast(msg) {
@@ -809,6 +813,10 @@ const Game = {
     // Cancel old game loop and start new one
     if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
     this.gameLoop();
+
+    // Focus window to capture keyboard input immediately
+    window.focus();
+    if (this.canvas) this.canvas.focus();
   },
 
   sendInputsToHost() {

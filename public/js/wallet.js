@@ -4,18 +4,20 @@ const StandardWallets = {
   init() {
     console.log("[Wallet Standard Registry] Initializing event listener...");
     
+    const registerCallback = (wallet) => {
+      if (wallet && !this.list.some(w => w.name === wallet.name)) {
+        this.list.push(wallet);
+        console.log("[Wallet Standard Registry] Registered wallet via event:", wallet.name);
+      }
+    };
+
     // Listen for wallet-standard:register-wallet events
     window.addEventListener('wallet-standard:register-wallet', (event) => {
       try {
         const register = event.detail;
         if (typeof register === 'function') {
           register({
-            register: (wallet) => {
-              if (wallet && !this.list.some(w => w.name === wallet.name)) {
-                this.list.push(wallet);
-                console.log("[Wallet Standard Registry] Registered wallet via event:", wallet.name);
-              }
-            }
+            register: registerCallback
           });
         }
       } catch (e) {
@@ -29,10 +31,7 @@ const StandardWallets = {
         window.navigator.wallets.on('register', () => {
           const wallets = window.navigator.wallets.get();
           for (const wallet of wallets) {
-            if (wallet && !this.list.some(w => w.name === wallet.name)) {
-              this.list.push(wallet);
-              console.log("[Wallet Standard Registry] Found wallet registered in navigator:", wallet.name);
-            }
+            registerCallback(wallet);
           }
         });
       } catch (e) {
@@ -45,10 +44,7 @@ const StandardWallets = {
       try {
         const wallets = window.navigator.wallets.get();
         for (const wallet of wallets) {
-          if (wallet && !this.list.some(w => w.name === wallet.name)) {
-            this.list.push(wallet);
-            console.log("[Wallet Standard Registry] Found existing wallet in navigator:", wallet.name);
-          }
+          registerCallback(wallet);
         }
       } catch (e) {
         console.warn("Failed to read navigator.wallets:", e);
@@ -57,7 +53,11 @@ const StandardWallets = {
 
     // Signal that the app is ready so already-loaded extensions re-trigger registration events
     try {
-      window.dispatchEvent(new CustomEvent('wallet-standard:app-ready'));
+      window.dispatchEvent(new CustomEvent('wallet-standard:app-ready', {
+        detail: {
+          register: registerCallback
+        }
+      }));
     } catch (e) {
       console.warn("Failed to dispatch wallet-standard:app-ready:", e);
     }
