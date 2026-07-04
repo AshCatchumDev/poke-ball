@@ -610,7 +610,7 @@ const Game = {
 
   resetRound() {
     this.p1.pos.x = 220;
-    this.p1.pos.y = 455;
+    this.p1.pos.y = this.p1.groundY;
     this.p1.vel.x = 0;
     this.p1.vel.y = 0;
     this.p1.energy = 0;
@@ -618,7 +618,7 @@ const Game = {
     this.p1.specialActive = false;
 
     this.p2.pos.x = 804;
-    this.p2.pos.y = 455;
+    this.p2.pos.y = this.p2.groundY;
     this.p2.vel.x = 0;
     this.p2.vel.y = 0;
     this.p2.energy = 0;
@@ -955,7 +955,7 @@ const Game = {
 
   handleDisconnect() {
     if (this.state === 'playing' || this.state === 'paused') {
-      alert("Rakip oyundan ayrıldı veya bağlantısı koptu!");
+      alert("Rakip oyundan ayrıldı veya bağlantısı koptu! Hükmen galip sayıldınız.");
       this.quitGame();
     }
   },
