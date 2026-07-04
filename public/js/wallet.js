@@ -113,6 +113,43 @@ const SolanaWallet = {
     }
   },
 
+  getWalletProvider(walletType) {
+    // Debugging logs to help identify what providers are present in the user's browser
+    console.log(`[Wallet Debug] Detecting provider for: ${walletType}`);
+    console.log("[Wallet Debug] window.solana:", window.solana);
+    console.log("[Wallet Debug] window.solanaProviders:", window.solanaProviders);
+    console.log("[Wallet Debug] window.jupiter:", window.jupiter);
+
+    if (walletType === 'phantom') {
+      return window.phantom?.solana || (window.solana?.isPhantom ? window.solana : null);
+    }
+    if (walletType === 'solflare') {
+      return window.solflare || (window.solana?.isSolflare ? window.solana : null);
+    }
+    if (walletType === 'backpack') {
+      return window.backpack || (window.solana?.isBackpack ? window.solana : null);
+    }
+    if (walletType === 'jupiter') {
+      // 1. Direct window.jupiter check
+      if (window.jupiter) return window.jupiter;
+
+      // 2. Check window.solanaProviders (if multiple extensions are installed, e.g., Phantom + Jupiter)
+      if (window.solanaProviders && Array.isArray(window.solanaProviders)) {
+        const jupProvider = window.solanaProviders.find(p => p.isJupiter || p.constructor?.name?.toLowerCase().includes('jupiter'));
+        if (jupProvider) return jupProvider;
+      }
+
+      // 3. Check window.solana?.isJupiter
+      if (window.solana?.isJupiter) return window.solana;
+
+      // 4. Fallback: If window.solana exists and does not belong to other well-known wallets (Phantom, Solflare, Backpack), it might be Jupiter!
+      if (window.solana && !window.solana.isPhantom && !window.solana.isSolflare && !window.solana.isBackpack) {
+        return window.solana;
+      }
+    }
+    return null;
+  },
+
   async checkIfConnected() {
     try {
       // Do not auto-reconnect if user explicitly disconnected in their previous action
@@ -123,16 +160,7 @@ const SolanaWallet = {
       const lastWallet = localStorage.getItem('last_wallet_type');
       if (!lastWallet || lastWallet === 'mock') return;
 
-      let selectedProvider = null;
-      if (lastWallet === 'phantom') {
-        selectedProvider = window.phantom?.solana || (window.solana?.isPhantom ? window.solana : null);
-      } else if (lastWallet === 'solflare') {
-        selectedProvider = window.solflare || (window.solana?.isSolflare ? window.solana : null);
-      } else if (lastWallet === 'backpack') {
-        selectedProvider = window.backpack || (window.solana?.isBackpack ? window.solana : null);
-      } else if (lastWallet === 'jupiter') {
-        selectedProvider = window.jupiter || (window.solana?.isJupiter ? window.solana : null);
-      }
+      const selectedProvider = this.getWalletProvider(lastWallet);
 
       if (selectedProvider) {
         this.provider = selectedProvider;
@@ -154,16 +182,7 @@ const SolanaWallet = {
         return;
       }
 
-      let selectedProvider = null;
-      if (walletType === 'phantom') {
-        selectedProvider = window.phantom?.solana || (window.solana?.isPhantom ? window.solana : null);
-      } else if (walletType === 'solflare') {
-        selectedProvider = window.solflare || (window.solana?.isSolflare ? window.solana : null);
-      } else if (walletType === 'backpack') {
-        selectedProvider = window.backpack || (window.solana?.isBackpack ? window.solana : null);
-      } else if (walletType === 'jupiter') {
-        selectedProvider = window.jupiter || (window.solana?.isJupiter ? window.solana : null);
-      }
+      const selectedProvider = this.getWalletProvider(walletType);
 
       if (!selectedProvider) {
         alert(`${walletType.toUpperCase()} cüzdanı tarayıcınızda yüklü değil! Lütfen resmi sitesinden kurabilir veya test için "Sanal Cüzdan" seçeneğini kullanabilirsiniz.`);
