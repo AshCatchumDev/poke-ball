@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Poke Ball - Efsanevi Pokemon Kafa Topu Savaşı</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Neon Background Ambient Light -->
+  <div class="ambient-glow"></div>
+
+  <!-- Game Container -->
+  <div id="game-container">
+    
+    <!-- Header/Logo Area -->
+    <header class="game-header">
+      <h1 class="logo-text font-outfit">POKE <span class="highlight">BALL</span></h1>
+      <p class="subtitle font-press-start">KAFA TOPU SAVASI</p>
+      
+      <!-- Solana Connect Wallet Button -->
+      <button id="wallet-connect-btn" class="wallet-btn font-outfit">
+        <span class="wallet-icon">🔌</span>
+        <span id="wallet-btn-text">Cüzdan Bağla</span>
+      </button>
+    </header>
+
+    <!-- Welcome / Landing Screen -->
+    <div id="landing-screen" class="screen active">
+      <div class="landing-container font-outfit">
+        <!-- Top Nav Header -->
+        <nav class="landing-nav">
+          <div class="landing-logo">POKE <span class="highlight">BALL</span></div>
+          <div class="nav-links">
+            <a href="#mechanics">Oyun Mekanikleri</a>
+            <a href="#features">Özellikler</a>
+            <a href="https://www.pokeball.games" target="_blank">pokeball.games</a>
+          </div>
+          <button id="landing-play-btn" class="nav-play-btn">SAVAŞA GİR 🎮</button>
+        </nav>
+
+        <!-- Hero Section -->
+        <header class="hero-section">
+          <div class="hero-content">
+            <span class="hero-badge">⚡ SOLANA WEB3 ARENASI</span>
+            <h1 class="hero-title">Kendi Kaderini Çiz, Arenanın <span class="text-gradient">Efsanesi Ol!</span></h1>
+            <p class="hero-desc">
+              Solana ağındaki en hızlı kafa topu savaşına katıl. Cüzdanını bağla, rakiplerini alt et ve kalıcı evrimlerle gücüne güç kat!
+            </p>
+            <div class="hero-actions">
+              <button id="hero-play-btn" class="hero-cta-btn">HEMEN OYNA 🕹️</button>
+              <a href="#mechanics" class="hero-secondary-btn">Nasıl Oynanır?</a>
+            </div>
+          </div>
+          <div class="hero-showcase">
+            <div class="showcase-card glass-panel">
+              <div class="showcase-glow"></div>
+              <div class="showcase-character charmander-idle"></div>
+              <div class="showcase-versus">VS</div>
+              <div class="showcase-character pikachu-idle"></div>
+            </div>
+          </div>
+        </header>
+
+        <!-- Mechanics / How to Play Section -->
+        <section id="mechanics" class="landing-section">
+          <h2 class="section-title">Nasil Oynanir?</h2>
+          <div class="mechanics-grid">
+            <div class="mech-card glass-panel">
+              <div class="mech-num">1</div>
+              <h3>Cüzdanini Bağla</h3>
+              <p>Sağ üst köşedeki "Cüzdan Bağla" butonu ile Solana cüzdanını (Phantom vb.) bağla veya test için Mock cüzdanı aktifleştir.</p>
+            </div>
+            <div class="mech-card glass-panel">
+              <div class="mech-num">2</div>
+              <h3>Modunu Seç</h3>
+              <p>Yapay zekaya karşı antrenman yap veya lobi eşleştirmesi ile ödüllü çevrimiçi versus arenalarına katıl.</p>
+            </div>
+            <div class="mech-card glass-panel">
+              <div class="mech-num">3</div>
+              <h3>Özel Gücünü Kullan</h3>
+              <p>Topa vurarak ve zıplayarak enerji barını doldur. Bar dolduğu an Shift veya Q tuşuna basarak özel gücünü serbest bırak!</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Features / Upgrades Section -->
+        <section id="features" class="landing-section">
+          <h2 class="section-title">Gelişmiş Web3 Özellikleri</h2>
+          <div class="features-grid">
+            <div class="feature-card glass-panel">
+              <div class="feature-icon">🤖</div>
+              <h3>AI Yapay Zeka Modu</h3>
+              <p>Kolay, Orta ve Zor yapay zeka seviyeleri ile kendini geliştir and kusursuz kafa golleri için taktik üret.</p>
+            </div>
+            <div class="feature-card glass-panel">
+              <div class="feature-icon">🤝</div>
+              <h3>Versus Eşleştirme Lobisi</h3>
+              <p>Merkezsiz eşleştirme protokolü ile gerçek rakiplerle eşleş. İmzayı at, bahis havuzuna gir ve yeteneğini kanıtla.</p>
+            </div>
+            <div class="feature-card glass-panel">
+              <div class="feature-icon">🔥</div>
+              <h3>Seçenek B Evrim Sistemi</h3>
+              <p>1 SOL ödeyerek Pokemon'larını Charizard veya Blastoise gibi son formlarına kalıcı olarak evrimleştir, statlarını katla!</p>
+            </div>
+          </div>
+        </section>
+        
+        <footer class="landing-footer">
+          <p>© 2026 Poke Ball Arena. All rights reserved. Powered by Solana Network.</p>
+        </footer>
+      </div>
+    </div>
+
+    <!-- Welcome / Main Menu Screen -->
+    <div id="menu-screen" class="screen">
+      <div class="glass-panel main-panel">
+        <h2 class="panel-title font-outfit">OYUN MODU SEÇİN</h2>
+        
+        <div class="menu-options">
+          <button id="mode-vs-ai" class="menu-btn font-outfit">
+            <span class="btn-icon">🤖</span>
+            <span class="btn-text">BİLGİSAYARA KARŞI</span>
+            <span class="btn-desc">1 Oyuncu vs Akıllı AI Yapay Zeka</span>
+          </button>
+          
+          <button id="mode-pvp" class="menu-btn font-outfit locked">
+            <span class="btn-icon">🌐</span>
+            <span class="btn-text">ONLINE VERSUS</span>
+            <span class="btn-desc" id="mode-pvp-desc">Cüzdan bağlayarak Solana arenasına katılın</span>
+            <span class="badge-locked" id="mode-pvp-badge">KİLİTLİ</span>
+          </button>
+        </div>
+
+        <div class="how-to-play glass-sub-panel font-outfit">
+          <h3>Nasıl Oynanır?</h3>
+          <div class="controls-guide">
+            <div class="player-controls">
+              <h4>Klavye Kontrolleri</h4>
+              <p>🟢 Hareket: <strong>A / D</strong> veya <strong>← / →</strong></p>
+              <p>🔵 Zıplama: <strong>W</strong> veya <strong>↑</strong></p>
+              <p>🔴 Şut: <strong>S</strong> veya <strong>↓</strong></p>
+              <p>⚡ Özel Güç: <strong>Q</strong> veya <strong>Shift</strong> (Enerji dolunca)</p>
+            </div>
+          </div>
+        </div>
+
+        <button id="back-to-landing-btn" class="back-btn font-outfit" style="margin-top: 1.2rem; width: 100%;">Geri Dön (Ana Sayfa)</button>
+      </div>
+    </div>
+
+    <!-- Character Selection Screen -->
+    <div id="select-screen" class="screen">
+      <div class="glass-panel selection-panel">
+        <h2 class="panel-title font-outfit">POKEMONUNUZU SEÇİN</h2>
+        
+        <!-- Choose Containers -->
+        <div class="selection-grid">
+          <!-- Player 1 Box -->
+          <div class="player-selection" id="p1-selection">
+            <h3 class="font-outfit text-p1">OYUNCU 1</h3>
+            <div class="selected-showcase" id="p1-showcase">
+              <div class="poke-avatar-large idle-bounce" id="p1-avatar-preview"></div>
+              <h4 id="p1-selected-name" class="font-outfit">Pikachu</h4>
+              <p id="p1-selected-desc" class="font-outfit">Hızlı ve elektrik çarpıcı!</p>
+              <div class="special-badge font-outfit" id="p1-special-badge">⚡ Thunderbolt</div>
+              <!-- Evolve Action Button -->
+              <button id="p1-evolve-btn" class="evolve-action-btn font-outfit">EVRİMLEŞTİR (1.0 SOL) 🔥</button>
+            </div>
+          </div>
+
+          <!-- Pokemon Roster -->
+          <div class="roster-container">
+            <div class="roster-grid" id="roster-grid">
+              <!-- Rendered dynamically in main.js -->
+            </div>
+
+            <!-- AI Difficulty Selector (Visible only in VS AI mode) -->
+            <div id="ai-settings" class="ai-difficulty-selector glass-sub-panel font-outfit">
+              <span>AI Zorluk Derecesi:</span>
+              <div class="difficulty-options">
+                <button class="diff-btn" data-diff="easy">KOLAY</button>
+                <button class="diff-btn active" data-diff="medium">ORTA</button>
+                <button class="diff-btn" data-diff="hard">ZOR</button>
+              </div>
+            </div>
+
+            <button id="start-game-btn" class="action-btn font-outfit">SAVAŞI BAŞLAT!</button>
+            <button id="back-to-menu-btn" class="back-btn font-outfit">Geri Dön</button>
+          </div>
+
+          <!-- Player 2 Box -->
+          <div class="player-selection" id="p2-selection">
+            <h3 class="font-outfit text-p2">AI RAKİP</h3>
+            <div class="selected-showcase" id="p2-showcase">
+              <div class="poke-avatar-large idle-bounce" id="p2-avatar-preview"></div>
+              <h4 id="p2-selected-name" class="font-outfit">Charmander</h4>
+              <p id="p2-selected-desc" class="font-outfit">Alevli şutların ustası!</p>
+              <div class="special-badge font-outfit" id="p2-special-badge">🔥 Fire Blast</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gameplay Screen -->
+    <div id="game-screen" class="screen">
+      <!-- HUD Overlay -->
+      <div id="hud" class="font-outfit">
+        <!-- P1 Stats -->
+        <div class="hud-player p1">
+          <div class="hud-meta">
+            <span class="hud-name" id="hud-p1-name">Pikachu</span>
+            <span class="hud-label text-p1">P1</span>
+          </div>
+          <div class="hud-energy-bar-container">
+            <div class="hud-energy-fill p1" id="hud-p1-energy" style="width: 100%"></div>
+            <span class="hud-energy-text">ÖZEL GÜÇ</span>
+          </div>
+        </div>
+
+        <!-- Scoreboard -->
+        <div class="scoreboard glass-panel">
+          <div class="score-box">
+            <span id="score-p1" class="score-digits">0</span>
+            <span class="score-separator">:</span>
+            <span id="score-p2" class="score-digits">0</span>
+          </div>
+          <div id="timer" class="game-timer">90</div>
+        </div>
+
+        <!-- P2 Stats -->
+        <div class="hud-player p2">
+          <div class="hud-meta">
+            <span class="hud-label text-p2" id="hud-p2-label">P2</span>
+            <span class="hud-name" id="hud-p2-name">Charmander</span>
+          </div>
+          <div class="hud-energy-bar-container">
+            <div class="hud-energy-fill p2" id="hud-p2-energy" style="width: 100%"></div>
+            <span class="hud-energy-text">ÖZEL GÜÇ</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Notifications / Action Messages -->
+      <div id="action-toast" class="action-toast font-outfit">HAZIRLANIN...</div>
+
+      <!-- Game Canvas -->
+      <canvas id="game-canvas" width="1024" height="576"></canvas>
+
+      <!-- Pause Menu Trigger & Back to Selection -->
+      <div class="game-controls-overlay">
+        <button id="pause-btn" class="icon-control-btn" title="Durdur">⏸</button>
+        <button id="mute-btn" class="icon-control-btn" title="Sesi Kapat" onclick="event.stopPropagation(); event.preventDefault(); const isMuted = SoundEffects.toggleMute(); this.textContent = isMuted ? '🔇' : '🔊'; this.blur();">🔊</button>
+        <button id="direct-quit-btn" class="icon-control-btn direct-quit" title="Oyundan Çık">🚪</button>
+      </div>
+
+      <!-- Pause Overlay Screen -->
+      <div id="pause-overlay" class="sub-screen">
+        <div class="glass-panel mini-panel font-outfit">
+          <h2>OYUN DURAKLATILDI</h2>
+          <button id="resume-btn" class="menu-btn-small">DEVAM ET</button>
+          <button id="quit-btn" class="menu-btn-small quit">SAVAŞTAN ÇEKİL</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Web3 Matchmaking Screen -->
+    <div id="matchmaking-screen" class="screen">
+      <div class="glass-panel matchmaking-panel font-outfit">
+        <div class="radar-container">
+          <div class="radar-pulse"></div>
+          <div class="poke-ball-scan"></div>
+        </div>
+        <h2 class="panel-title">AKILLI SÖZLEŞME LOBİSİ</h2>
+        <p id="matchmaking-status" class="status-text">Solana cüzdan imzası doğrulanıyor...</p>
+        
+        <div class="matchmaking-steps">
+          <div class="step-item active" id="step-wallet">
+            <span class="step-check">🟢</span> Cüzdan Bağlantısı
+          </div>
+          <div class="step-item" id="step-signature">
+            <span class="step-check">⏳</span> Lobi Giriş İmzası
+          </div>
+          <div class="step-item" id="step-search">
+            <span class="step-check">⏳</span> Rakip Bulma (Versus Lobby)
+          </div>
+        </div>
+        
+        <button id="cancel-matchmaking-btn" class="back-btn small">Lobi İptal</button>
+      </div>
+    </div>
+
+    <!-- Game Over / Results Screen -->
+    <div id="gameover-screen" class="screen">
+      <div class="glass-panel results-panel font-outfit">
+        <div class="winner-trophy">🏆</div>
+        <h2 id="winner-title" class="winner-title">OYUNCU 1 KAZANDI!</h2>
+        <p id="winner-detail" class="winner-detail">Pikachu, Charmander'ı ezdi geçti.</p>
+
+        <div class="results-stats glass-sub-panel">
+          <div class="stat-row">
+            <span>Toplam Gol</span>
+            <span id="result-score" class="font-bold">5 : 3</span>
+          </div>
+          <div class="stat-row">
+            <span>Kullanılan Özel Güçler</span>
+            <span id="result-specials">8 Kez</span>
+          </div>
+        </div>
+
+        <div class="results-actions">
+          <button id="rematch-btn" class="action-btn">YENİDEN OYNA</button>
+          <button id="exit-to-menu-btn" class="back-btn">Ana Menüye Dön</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Game Scripts -->
+  <script src="js/physics.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/particles.js"></script>
+  <script src="js/entities.js"></script>
+  <script src="js/ai.js"></script>
+  <script src="js/wallet.js"></script>
+  <!-- Evolution Animation Overlay Screen -->
+  <div id="evolution-overlay" class="evolution-overlay-screen" style="display: none;">
+    <canvas id="evo-canvas" style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;"></canvas>
+    <div class="evo-content">
+      <h2 class="evo-title font-outfit">POKEMON EVRİMLEŞİYOR!</h2>
+      
+      <div class="evo-stage">
+        <div class="evo-ring"></div>
+        <div class="evo-glow-beam"></div>
+        <div class="evo-avatar-container">
+          <div id="evo-avatar-sprite" class="evo-avatar-sprite"></div>
+        </div>
+      </div>
+      
+      <div class="evo-info-box">
+        <p id="evo-status-text" class="font-outfit">Gerekli transfer onaylanıyor...</p>
+        <button id="evo-continue-btn" class="evo-continue-btn font-outfit" style="display: none;">DEVAM ET ⚡</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Wallet Selector Modal -->
+  <div id="wallet-modal" class="wallet-modal-overlay" style="display: none;">
+    <div class="wallet-modal-content glass-panel font-outfit">
+      <div class="wallet-modal-header">
+        <h3>CÜZDAN SEÇİN</h3>
+        <button id="close-wallet-modal-btn" class="close-modal-btn">✕</button>
+      </div>
+      <div class="wallet-options-list">
+        <button class="wallet-option-btn" data-wallet="phantom">
+          <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDgiIGhlaWdodD0iMTA4IiB2aWV3Qm94PSIwIDAgMTA4IDEwOCIgZmlsbD0ibm9uZSI+PHJlY3Qgd2lkdGg9IjEwOCIgaGVpZ2h0PSIxMDgiIHJ4PSIyNiIgZmlsbD0iI0FCOUZGMiIvPjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNNDYuNTI2NyA2OS45MjI5QzQyLjAwNTQgNzYuODUwOSAzNC40MjkyIDg1LjYxODIgMjQuMzQ4IDg1LjYxODJDMTkuNTgyNCA4NS42MTgyIDE1IDgzLjY1NjMgMTUgNzUuMTM0MkMxNSA1My40MzA1IDQ0LjYzMjYgMTkuODMyNyA3Mi4xMjY4IDE5LjgzMjdDODcuNzY4IDE5LjgzMjcgOTQgMzAuNjg0NiA5NCA0My4wMDc5Qzk0IDU4LjgyNTggODMuNzM1NSA3Ni45MTIyIDczLjUzMjEgNzYuOTEyMkM3MC4yOTM5IDc2LjkxMjIgNjguNzA1MyA3NS4xMzQyIDY4LjcwNTMgNzIuMzE0QzY4LjcwNTMgNzEuNTc4MyA2OC44Mjc1IDcwLjc4MTIgNjkuMDcxOSA2OS45MjI5QzY1LjU4OTMgNzUuODY5OSA1OC44Njg1IDgxLjM4NzggNTIuNTc1NCA4MS4zODc4QzQ3Ljk5MyA4MS4zODc4IDQ1LjY3MTMgNzguNTA2MyA0NS42NzEzIDc0LjQ1OThDNDUuNjcxMyA3Mi45ODg0IDQ1Ljk3NjggNzEuNDU1NiA0Ni41MjY3IDY5LjkyMjlaTTgzLjY3NjEgNDIuNTc5NEM4My42NzYxIDQ2LjE3MDQgODEuNTU3NSA0Ny45NjU4IDc5LjE4NzUgNDcuOTY1OEM3Ni43ODE2IDQ3Ljk2NTggNzQuNjk4OSA0Ni4xNzA0IDc0LjY5ODkgNDIuNTc5NEM3NC42OTg5IDM4Ljk4ODUgNzYuNzgxNiAzNy4xOTMxIDc5LjE4NzUgMzcuMTkzMUM4MS41NTc1IDM3LjE5MzEgODMuNjc2MSAzOC45ODg1IDgzLjY3NjEgNDIuNTc5NFpNNzAuMjEwMyA0Mi41Nzk1QzcwLjIxMDMgNDYuMTcwNCA2OC4wOTE2IDQ3Ljk2NTggNjUuNzIxNiA0Ny45NjU4QzYzLjMxNTcgNDcuOTY1OCA2MS4yMzMgNDYuMTcwNCA2MS4yMzMgNDIuNTc5NUM2MS4yMzMgMzguOTg4NSA2My4zMTU3IDM3LjE5MzEgNjUuNzIxNiAzNy4xOTMxQzY4LjA5MTYgMzcuMTkzMSA3MC4yMTAzIDM4Ljk4ODUgNzAuMjEwMyA0Mi41Nzk1WiIgZmlsbD0iI0ZGRkRGOCIvPjwvc3ZnPg==" alt="Phantom">
+          <span>Phantom</span>
+        </button>
+        <button class="wallet-option-btn" data-wallet="solflare">
+          <img src="data:image/svg+xml;base64,PHN2ZyBpZD0iUyIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2aWV3Qm94PSIwIDAgNTAgNTAiPjxkZWZzPjxzdHlsZT4uY2xzLTF7ZmlsbDojMDIwNTBhO3N0cm9rZTojZmZlZjQ2O3N0cm9rZS1taXRlcmxpbWl0OjEwO3N0cm9rZS13aWR0aDouNXB4O30gLmNscy0ye2ZpbGw6I2ZmZWY0Njt9PC9zdHlsZT48L2RlZnM+PHJlY3QgY2xhc3M9ImNscy0yIiB4PSIwIiB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHJ4PSIxMiIgcnk9IjEyIi8+PHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMjQuMjMsMjYuNDJsMi40Ni0yLjM4LDQuNTksMS41YzMuMDEsMSw0LjUxLDIuODQsNC41MSw1LjQzLDAsMS45Ni0uNzUsMy4yNi0yLjI1LDQuOTNsLS40Ni41LjE3LTEuMTdjLjY3LTQuMjYtLjU4LTYuMDktNC43Mi03LjQzbC00LjMtMS4zOGgwWk0xOC4wNSwxMS44NWwxMi41Miw0LjE3LTIuNzEsMi41OS02LjUxLTIuMTdjLTIuMjUtLjc1LTMuMDEtMS45Ni0zLjMtNC41MXYtLjA4aDBaTTE3LjMsMzMuMDZsMi44NC0yLjcxLDUuMzQsMS43NWMyLjguOTIsMy43NiwyLjEzLDMuNDYsNS4xOGwtMTEuNjUtNC4yMmgwWk0xMy43MSwyMC45NWMwLS43OS40Mi0xLjU0LDEuMTMtMi4xNy43NSwxLjA5LDIuMDUsMi4wNSw0LjA5LDIuNzFsNC40MiwxLjQ2LTIuNDYsMi4zOC00LjM0LTEuNDJjLTItLjY3LTIuODQtMS42Ny0yLjg0LTIuOTZNMjYuODIsNDIuODdjOS4xOC02LjA5LDE0LjExLTEwLjIzLDE0LjExLTE1LjMyLDAtMy4zOC0yLTUuMjYtNi40My02LjcybC0zLjM0LTEuMTMsOS4xNC04Ljc3LTEuODQtMS45Ni0yLjcxLDIuMzgtMTIuODEtNC4yMmMtMy45NywxLjI5LTguOTcsNS4wOS04Ljk3LDguODksMCwuNDIuMDQuODMuMTcsMS4yOS0zLjMsMS44OC00LjYzLDMuNjMtNC42Myw1LjgsMCwyLjA1LDEuMDksNC4wOSw0LjU1LDUuMjJsMi43NS45Mi05LjUyLDkuMTQsMS44NCwxLjk2LDIuOTYtMi43MSwxNC43Myw1LjIyaDBaIi8+PC9zdmc+" alt="Solflare">
+          <span>Solflare</span>
+        </button>
+        <button class="wallet-option-btn" data-wallet="backpack">
+          <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAbvSURBVHgB7Z1dUtxGEMf/LZH3fU0V4PUJQg4QVj5BnBOAT2BzAsMJAicwPoHJCRDrAxifgLVxVV73ObDqdEtsjKn4C8+0NDv9e7AxprRC85uvnp4RYYW5qKpxCVTcYKsgfiDfGjMwIsZIvh7d/lkmzAiYy5fzhultyZhdlagf1vU5VhjCiiGFXq01zYSJdqWgx/hB5AHN5I/6iuilyFBjxVgZAdqCZ34ORoVIqAzSOhxsvq6PsSIkL4A281LwL2IW/F1UhLKgRz/X9QyJUyBhuuae31gWviLjiPF1wxeX29vPkTjJtgAftrd3GHSMnmHw4eZ0uodESVKAoRT+kpQlSE6Ats/XZv/ONK5vZHC49+B1fYjESG4MUDKfYmCFr0ic4fmHqtpCYiQlgA66QsztIzFi5j+RGMl0AXebfgn0aOTuvGG8owIarZsXOj3ronlRuEYnn84CJLo4Lgi/QL/H/LHmy/RwI6GA0RoS4acFHi8kGieFXS/QhmijFfQXmH3uPy5lSkoLbIkYlfyzhuM4juM4juM4juMMj6TzATQ4JH9tlRqFk8BM2aV9RWHB9K5kzK/KLui0KqliSQmgBa4BIS54cpMD0OeawFye3jk19JdKkWq62OAFkEIfrTXNUxBV1okf38Ot3MGjlFqHwQrQZvQ22Cfw7xjg6t8XkZaBGzpKIXdwcAJojZeCP5SC30HipJBEOigBZLn3qdzSPlKr8V9hyEmkgxCgj8zefuD9jen0AAOidwE0i6ZhfjXgRI+gDK016DUjqE3ubPhNLoWvaDLJouHToaSP9SbA0DJ7LekyiviNPgP0TC9dQM6FfxeZ7eyuT6cv0RPmAmjTx11uXx/MiegEDd425cfcwWV+H4O3+uiO+pTAVIA2uMN8av6QiWr5TQ++JVlTc/tEiF3jOMScZGC43kME0VSA95PJhWXhM+Gt1Phn98nStZa1r9mB2SDQPqefjhayfnDfFG2J5882z84eynVM5u3thlONhRhj0gLc5PRfwAw62JjW+wjE5Xa1L0VkshO4kXt/EPDev4ZJCyBRvlcwggjHG4EfYHc9OoIBBWy3mEUX4H1V7Ur7ZvILaT8qy7FRduleF9jXc4RggOUWs/gtANs0nYquvMXaMaTXlQHlE1ggayLvf5OKY0DUMYDWfmpsBjZa+9enOmiLy+VkcmqxaNW2ZgX9GnsLXNQWoGj4KYzQ2g8LyG5WUDR4hshEE6CN+AFmg5lFiRMYcI0uKRQGyIAwegWKJkBjYO8tzq12C7efQ7CK2I00MomIxOsCiCcwQhaW3sEQ6W7sPi/yIDqKAHp8m2nIF7COoc9ghQw4NU8SkYgiQCmLKXCCUSziPc84XYBh83/DSiWR3qUo2tT4ONdGYDTub73cSzD/PNt0rojdQHAByoXxw0E7XfoFhsjnRduD+DnWIkkXXACJl1cwRoMmf3cbRaOjLRzDXnKZVj9GBIILUJBtbVzyj9HAU19AgR6I9VzDtwCgMXpAo2Yxp0v/Ybi49ennJtIFEPMY/TCKHTvv+aTSUQzBgwrQ92YHbQVi3UN3GAVZhrf/jzECE1SAq/7n4yOJ074KPSBcJoii598vxgwrqAByg70HZJZbr0JJ0G5XZz5Z1e1rYccA5TAicqEk0O5ECl/3LvYys7mLTLHHCEzS7wz6Esv3+nyYTF58rwha63XAl8PG1aCnhesWq6EdOcKM3WvmXRHh+Gvv/tNVTJlJPC4a3RVEK72+sCSZ4+J/FBVhTUS43J7gJqFjrnl33A3sxtCa3nAWhX6bbAT4hJugCsNZ2TGA8224AJnjAmSOC5A5LkDmuACZ4wJkjguQOS5A5rgAmeMCZI4LkDkuQOa4AJnjAmSOC5A5LkDmuACZ4wJkjguQOWEFYJvz85xwBBWgKM1P68oKKsI/36ACdC9nsDlWPTsIJ5t1Hfw01OBjgI1p/YwLegIibw0CwESz9gUYZ2d/wHEcx3Ecx3Ecx3Ecx3HuS5QjfdrXxTHv3JzEkd2xKwHR9xPNuKGjzdf1MSIQXAA9XUsuuw8nKPpK3PWzs+AvrgwqgP1LojOjoEf3fRv6Zy+JgBSLOGfaOx1NE/6o+rCrgeT9fWp4SljmuACZ4wJkjguQOS5A5rgAmeMCZI4LkDkuQOa4AJnjAmSOC5A5LkDmuACZ4wJkjguQOS5A5rgAmeMCZI4LkDkuQOa4AJnj5wRmTlABqHQBohKhggUVYAEEP8fO+UiMgziDCvCwrnU3aw0nOATMQu8LVIIPAq+JdAerdwWBaQ/fjEBwAaQVmMnN7sEJCB3EqP3tlRGJy6qqmPkFMcZw7sucmfZiHQ6hRBNgSXdaCHbA7KeFfBvz9pxlxtl1gcN2XBWRfwHK959XFRG6AgAAAABJRU5ErkJggg==" alt="Backpack">
+          <span>Backpack</span>
+        </button>
+        <button class="wallet-option-btn" data-wallet="jupiter">
+          <img src="https://jup.ag/svg/jupiter-logo.svg" alt="Jupiter" style="border-radius: 50%;">
+          <span>Jupiter Wallet</span>
+        </button>
+        <button class="wallet-option-btn mock-option" data-wallet="mock">
+          <span class="mock-wallet-icon">🤖</span>
+          <span>Sanal Cüzdan (Mock Wallet)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Quit Confirmation Modal -->
+  <div id="quit-confirm-modal" class="wallet-modal-overlay" style="display: none; z-index: 10001;">
+    <div class="wallet-modal-content glass-panel font-outfit" style="max-width: 380px; text-align: center; border-color: rgba(239, 68, 68, 0.4); box-shadow: 0 0 30px rgba(239, 68, 68, 0.15);">
+      <h3 style="margin-top: 0; color: #ef4444; font-size: 1.6rem; letter-spacing: 1px;">SAVAŞTAN ÇEKİL</h3>
+      <p style="margin: 1.5rem 0; color: #cbd5e1; font-size: 1.05rem; line-height: 1.6;">Savaştan çekilip ana menüye dönmek istediğinize emin misiniz?</p>
+      <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1.8rem;">
+        <button id="quit-confirm-yes-btn" class="action-btn" style="background: linear-gradient(135deg, #ef4444, #b91c1c); flex: 1; padding: 0.8rem; margin: 0; border: none; font-weight: bold; border-radius: 12px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);">EVET, ÇIK</button>
+        <button id="quit-confirm-no-btn" class="back-btn" style="margin: 0; flex: 1; padding: 0.8rem; font-weight: bold; border-radius: 12px;">DEVAM ET</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
