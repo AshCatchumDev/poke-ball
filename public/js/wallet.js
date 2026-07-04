@@ -9,10 +9,12 @@ const StandardWallets = {
       try {
         const register = event.detail;
         if (typeof register === 'function') {
-          register((wallet) => {
-            if (wallet && !this.list.some(w => w.name === wallet.name)) {
-              this.list.push(wallet);
-              console.log("[Wallet Standard Registry] Registered wallet via event:", wallet.name);
+          register({
+            register: (wallet) => {
+              if (wallet && !this.list.some(w => w.name === wallet.name)) {
+                this.list.push(wallet);
+                console.log("[Wallet Standard Registry] Registered wallet via event:", wallet.name);
+              }
             }
           });
         }
