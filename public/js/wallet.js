@@ -119,6 +119,7 @@ const SolanaWallet = {
     console.log("[Wallet Debug] window.solana:", window.solana);
     console.log("[Wallet Debug] window.solanaProviders:", window.solanaProviders);
     console.log("[Wallet Debug] window.jupiter:", window.jupiter);
+    console.log("[Wallet Debug] window.navigator.wallets:", window.navigator?.wallets?.get ? window.navigator.wallets.get() : "undefined");
 
     if (walletType === 'phantom') {
       return window.phantom?.solana || (window.solana?.isPhantom ? window.solana : null);
@@ -142,7 +143,42 @@ const SolanaWallet = {
       // 3. Check window.solana?.isJupiter
       if (window.solana?.isJupiter) return window.solana;
 
-      // 4. Fallback: If window.solana exists and does not belong to other well-known wallets (Phantom, Solflare, Backpack), it might be Jupiter!
+      // 4. Check Wallet Standard (window.navigator.wallets) - Modern approach
+      if (window.navigator?.wallets?.get) {
+        const standardWallets = window.navigator.wallets.get();
+        const jupWallet = standardWallets.find(w => w.name?.toLowerCase().includes('jupiter'));
+        if (jupWallet) {
+          console.log("[Wallet Debug] Found Jupiter via Wallet Standard:", jupWallet);
+          return {
+            isStandardWallet: true,
+            wallet: jupWallet,
+            async connect(options = {}) {
+              const connectFeature = jupWallet.features['standard:connect'];
+              if (!connectFeature) throw new Error("Wallet does not support connect feature");
+              const { accounts } = await connectFeature.connect({ silent: !!options.onlyIfTrusted });
+              const address = accounts[0].address;
+              return {
+                publicKey: {
+                  toString() { return address; }
+                }
+              };
+            },
+            async signMessage(message, encoding) {
+              const signFeature = jupWallet.features['solana:signMessage'];
+              if (!signFeature) {
+                console.warn("Wallet does not support solana:signMessage feature");
+                return null;
+              }
+              return await signFeature.signMessage({
+                account: jupWallet.accounts[0],
+                message
+              });
+            }
+          };
+        }
+      }
+
+      // 5. Fallback: If window.solana exists and does not belong to other well-known wallets (Phantom, Solflare, Backpack), it might be Jupiter!
       if (window.solana && !window.solana.isPhantom && !window.solana.isSolflare && !window.solana.isBackpack) {
         return window.solana;
       }
