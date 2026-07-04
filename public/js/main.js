@@ -676,7 +676,7 @@ const Game = {
           this.p2.useSpecial(this.ball, this.p1, this.particles);
         }
       }
-    } else {
+    } else if (this.mode === 'vs-ai') {
       // AI
       AI.update(this.p2, this.p1, this.ball, this.difficulty);
     }
